@@ -1,6 +1,7 @@
 package test;
 
 import org.apache.http.Header;
+import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -27,6 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Main {
+    public static String PATTERN = "id=\"adminmenumain\" role=\"navigation\"";
     public static void main(String[] args) {
         CookieStore cookieStore = new BasicCookieStore();
 
@@ -91,13 +93,13 @@ public class Main {
                     }
                 }
                 System.out.println("===========================================================");
+
+                if (response.getStatusLine().getStatusCode() != HttpStatus.SC_MOVED_TEMPORARILY){
+                    System.out.println("Неправильный логин или пароль.");
+                    return;
+                }
             } catch (IOException e) {
                 e.printStackTrace();
-            }
-
-            if (location.isEmpty()){
-                System.out.println("Ошибка");
-                return;
             }
 
             HttpGet request = new HttpGet(location);
@@ -118,6 +120,12 @@ public class Main {
                 }
 
                 System.out.println("===========================================================");
+
+                String responseBody = EntityUtils.toString(response.getEntity());
+                if(!responseBody.contains(PATTERN)){
+                    System.out.println("Ошибка аутентификации");
+                }
+
             } catch (IOException e) {
                 e.printStackTrace();
             }
